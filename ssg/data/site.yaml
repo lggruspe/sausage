@@ -11,6 +11,13 @@ targets:
 
   posts/%:
     template: posts/_post.html
-    content: pandoc posts/%.md
+    with:
+      content: pandoc posts/%.md
     run: >
       npx template-engine posts/_post.html $json_context -o $out
+
+# targets:
+#   content/%:
+#     template: templates/%.html
+#     with:
+#       content: pandoc content/%.md
