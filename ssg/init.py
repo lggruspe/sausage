@@ -21,3 +21,9 @@ def init() -> None:
     Path("src").mkdir(exist_ok=True)
     Path("public").mkdir(exist_ok=True)
     Path("templates").mkdir(exist_ok=True)
+
+    src = Path("src")
+    copy2(data/"_index.html", src)
+    copy2(data/"_index.html.json", src)
+    copy2(data/"_index.md", src)
+    copy2(data/"_index.footer.md", src)

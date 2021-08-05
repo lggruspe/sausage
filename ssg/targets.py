@@ -38,7 +38,8 @@ class ContextRecipe(t.NamedTuple):
             except yaml.parser.ParserError:
                 pass
 
-        with NamedTemporaryFile() as out:
+        with NamedTemporaryFile() as temp_file:
+            out = Path(temp_file.name)
             tokens = [
                 out.name if a == "$out" else a
                 for a in shlex.split(self.recipe)
@@ -58,7 +59,7 @@ class Target(t.NamedTuple):
     name: str
     template: Path
     context: t.Optional[ContextRecipe] = None
-    namespace: t.Dict[str, t.Union[Path, ContextRecipe]] = {}
+    namespace: t.Dict[str, ContextRecipe] = {}
 
     def eval_context(self) -> t.Any:
         """"Evaluate template context in src/."""
@@ -78,10 +79,10 @@ class Target(t.NamedTuple):
 
         Converts '%' into '*' for globbing.
         """
-        recipes = iter(self.namespace.values())
-        if self.context:
-            recipes = chain(recipes, self.context)
-
+        recipes = chain(
+            self.namespace.values(),
+            [self.context] if self.context else [],
+        )
         for recipe in recipes:
             for token in shlex.split(recipe.recipe):
                 if has_wildcard(token):
@@ -97,7 +98,9 @@ class Target(t.NamedTuple):
             return None
 
         patterns = self.get_globs()
-        replacements = set.intersection(map(get_wildcard_candidates, patterns))
+        replacements = set.intersection(
+            *(set(get_wildcard_candidates(p)) for p in patterns)
+        )
 
         if not replacements:
             return None

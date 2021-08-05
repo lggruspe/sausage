@@ -39,4 +39,4 @@ class Config(t.NamedTuple):
     @staticmethod
     def read(path: t.Union[str, Path]) -> "Config":
         """Read config from file."""
-        return Config.from_dict(yaml.load(Path(path).read_text()))
+        return Config.from_dict(yaml.safe_load(Path(path).read_text()))

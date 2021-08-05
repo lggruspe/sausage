@@ -25,7 +25,8 @@ def build() -> None:
     """
     config = Config.read("site.yaml")
     with TemporaryDirectory() as tmp:
-        shutil.copytree("src", tmp)
+        tmp = Path(tmp)
+        shutil.copytree("src", tmp, dirs_exist_ok=True)
 
         for name, target in config.targets.items():
             expanded = target.expand()
