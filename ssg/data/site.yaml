@@ -1,0 +1,16 @@
+ignore: ["_*", "*.md", ".*"]
+targets:
+  index.html:
+    cached: true
+    template: _index.html
+    context: cat _index.html.json
+    with:
+      # basedir of commands is src/
+      content: pandoc _index.md               # get from stdout
+      footer: pandoc _index.footer.md -o $out # get from $out
+
+  posts/%:
+    template: posts/_post.html
+    content: pandoc posts/%.md
+    run: >
+      npx template-engine posts/_post.html $json_context -o $out
