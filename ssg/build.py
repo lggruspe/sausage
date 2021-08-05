@@ -26,8 +26,14 @@ def build() -> None:
     config = Config.read("site.yaml")
     with TemporaryDirectory() as tmp:
         shutil.copytree("src", tmp)
+
         for name, target in config.targets.items():
-            (tmp/name).write_text(target.generate())
+            expanded = target.expand()
+            if expanded is None:
+                (tmp/name).write_text(target.generate())
+            else:
+                for targ in expanded:
+                    (tmp/targ.name).write_text(targ.generate())
 
         public = Path("public")
         public.mkdir(exist_ok=True)

@@ -1,9 +1,9 @@
 ignore: ["_*", "*.md", ".*"]
 targets:
   index.html:
-    cached: true
+    # cached: false
     template: _index.html
-    context: cat _index.html.json
+    context: _index.html.json
     with:
       # basedir of commands is src/
       content: pandoc _index.md               # get from stdout

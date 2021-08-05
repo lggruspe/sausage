@@ -5,7 +5,7 @@ import typing as t
 
 import yaml
 
-from ssg.targets import Target
+from ssg.targets import ContextRecipe, Target
 
 
 class Config(t.NamedTuple):
@@ -20,7 +20,20 @@ class Config(t.NamedTuple):
         targets = mapping.get("targets", {})
         return Config(
             ignore,
-            {k: Target(name=k, **v) for k, v in targets.items()},
+            {
+                k: Target(
+                    name=k,
+                    template=Path(v["template"]),
+                    context=(
+                        ContextRecipe(v["context"]) if "context" in v else None
+                    ),
+                    namespace={
+                        a: ContextRecipe(b)
+                        for a, b in v.get("with", {}).items()
+                    },
+                )
+                for k, v in targets.items()
+            },
         )
 
     @staticmethod
