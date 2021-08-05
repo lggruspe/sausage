@@ -1,5 +1,6 @@
 """Generate target."""
 
+from itertools import chain
 import json
 from pathlib import Path
 import shlex
@@ -10,31 +11,9 @@ import typing as t
 import yaml
 
 from ssg.engines import render_jinja
-
-
-def find_wildcards(string: str) -> t.Iterable[int]:
-    """Find '%'s in string."""
-    i = len(string)
-    while i >= 0:
-        j = string.rfind("%", 0, i)
-        if j == 0 or string[j - 1] != "%":
-            yield j
-        i = j
-
-
-def replace_wildcards(string: str, replacement: str) -> str:
-    """Replace '%'s in string."""
-    for i in find_wildcards(string):
-        string = f"{string[:i]}{replacement}{string[i+1:]}"
-    return string
-
-
-def has_wildcard(string: str) -> bool:
-    """Check if string has '%'s."""
-    try:
-        return next(find_wildcards(string))
-    except StopIteration:
-        return False
+from ssg.wildcards import (
+    get_wildcard_candidates, has_wildcard, replace_wildcards
+)
 
 
 class ContextRecipe(t.NamedTuple):
@@ -76,6 +55,7 @@ class ContextRecipe(t.NamedTuple):
 
 class Target(t.NamedTuple):
     """File to be generated."""
+    name: str
     template: Path
     context: t.Optional[ContextRecipe] = None
     namespace: t.Dict[str, t.Union[Path, ContextRecipe]] = {}
@@ -93,6 +73,20 @@ class Target(t.NamedTuple):
         context = self.eval_context()
         return render_jinja(self.template, context)
 
+    def get_globs(self) -> t.Iterable[str]:
+        """Extract wildcard patterns used by target.
+
+        Converts '%' into '*' for globbing.
+        """
+        recipes = iter(self.namespace.values())
+        if self.context:
+            recipes = chain(recipes, self.context)
+
+        for recipe in recipes:
+            for token in shlex.split(recipe.recipe):
+                if has_wildcard(token):
+                    yield replace_wildcards(token, "*")
+
     def expand(self) -> t.Optional[t.Iterable["Target"]]:
         """Expand % in target.
 
@@ -102,28 +96,23 @@ class Target(t.NamedTuple):
         if not has_wildcard(template):
             return None
 
-        recipes = list(self.namespace.values())
-        if self.context:
-            recipes.append(self.context.recipe)
-        patterns = [
-            replace_wildcards(t, "*")
-            for r in recipes for t in shlex.split(r.recipe)
-            if has_wildcard(t)
-        ]
+        patterns = self.get_globs()
+        replacements = set.intersection(map(get_wildcard_candidates, patterns))
 
-        # replacement shouldn't be ...
-        src = Path("src")
+        if not replacements:
+            return None
         return (
             Target(
+                name=replace_wildcards(self.name, replacement),
                 template=self.template,
                 context=(
-                    self.context.with_replaced_wildcards(...)
+                    self.context.with_replaced_wildcards(replacement)
                     if self.context else None
                 ),
                 namespace={
-                    k: v.with_replaced_wildcards(...)
+                    k: v.with_replaced_wildcards(replacement)
                     for k, v in self.namespace.items()
                 },
             )
-            for result in set.intersection(src.glob(p) for p in patterns)
+            for replacement in replacements
         )

@@ -20,7 +20,7 @@ class Config(t.NamedTuple):
         targets = mapping.get("targets", {})
         return Config(
             ignore,
-            {k: Target(**v) for k, v in targets.items()},
+            {k: Target(name=k, **v) for k, v in targets.items()},
         )
 
     @staticmethod
