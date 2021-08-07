@@ -41,7 +41,7 @@ class ContextRecipe(t.NamedTuple):
         with NamedTemporaryFile() as temp_file:
             out = Path(temp_file.name)
             tokens = [
-                out.name if a == "$out" else a
+                str(out) if a == "$out" else a
                 for a in shlex.split(self.recipe)
             ]
             proc = subprocess.run(
@@ -51,7 +51,7 @@ class ContextRecipe(t.NamedTuple):
                 check=True,
                 cwd=src
             )
-            return out.read_text() if out.name in tokens else proc.stdout
+            return out.read_text() if str(out) in tokens else proc.stdout
 
 
 class Target(t.NamedTuple):
