@@ -93,17 +93,13 @@ class Target(t.NamedTuple):
 
         Returns None if target doesn't have %.
         """
-        template = str(self.template)
-        if not has_wildcard(template):
+        if not has_wildcard(self.name):
             return None
 
         patterns = self.get_globs()
         replacements = set.intersection(
             *(set(get_wildcard_candidates(p)) for p in patterns)
         )
-
-        if not replacements:
-            return None
         return (
             Target(
                 name=replace_wildcards(self.name, replacement),

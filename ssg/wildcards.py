@@ -11,6 +11,8 @@ def find_wildcards(string: str) -> t.Iterable[int]:
     i = len(string)
     while i >= 0:
         j = string.rfind("%", 0, i)
+        if j < 0:
+            break
         if j == 0 or string[j - 1] != "%":
             yield j
         i = j
@@ -26,7 +28,8 @@ def replace_wildcards(string: str, replacement: str) -> str:
 def has_wildcard(string: str) -> bool:
     """Check if string has '%'s."""
     try:
-        return next(find_wildcards(string))
+        next(find_wildcards(string))
+        return True
     except StopIteration:
         return False
 
@@ -49,5 +52,5 @@ def get_wildcard_candidates(pattern: str) -> t.Iterable[str]:
     src = Path("src")
     for path in src.glob(pattern):
         xs, ys = zip(*get_non_matching_blocks(pattern, str(path)))
-        if xs == {"%"} and len(ys) == 1:
-            yield ys.pop()
+        if xs == ("*",) and len(ys) == 1:
+            yield ys[0]

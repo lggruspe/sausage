@@ -27,3 +27,6 @@ def init() -> None:
     copy2(data/"_index.html.json", src)
     copy2(data/"_index.md", src)
     copy2(data/"_index.footer.md", src)
+
+    (src/"posts").mkdir(exist_ok=True)
+    copy2(data/"posts"/"_post.html", src/"posts")
