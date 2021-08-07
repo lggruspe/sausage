@@ -1,4 +1,9 @@
-ignore: ["_*", "*.md", ".*"]
+ignore:
+  - "**/_*"
+  - "**/*.md"
+  - "**/.*"
+  - "**/*.yaml"
+  - "**/*.json"
 targets:
   index.html:
     template: _index.html
