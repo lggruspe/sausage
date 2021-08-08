@@ -4,6 +4,7 @@ ignore:
   - "**/.*"
   - "**/*.yaml"
   - "**/*.json"
+
 targets:
   index.html:
     template: _index.html

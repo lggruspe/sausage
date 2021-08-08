@@ -1,10 +1,10 @@
-"""'ssg build' command."""
+"""'sausage build' command."""
 
 from pathlib import Path
 import shutil
 from tempfile import TemporaryDirectory
 
-from ssg.config import Config
+from sausage.config import Config
 
 
 def clear(directory: Path) -> None:

@@ -1,4 +1,4 @@
-"""'ssg init' command."""
+"""'sausage init' command."""
 
 from pathlib import Path
 from shutil import copy2

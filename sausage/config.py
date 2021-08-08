@@ -5,11 +5,11 @@ import typing as t
 
 import yaml
 
-from ssg.targets import ContextRecipe, Target
+from sausage.targets import ContextRecipe, Target
 
 
 class Config(t.NamedTuple):
-    """ssg Config."""
+    """sausage Config."""
     ignore: t.List[str]
     targets: t.Dict[str, Target]
 

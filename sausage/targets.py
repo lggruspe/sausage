@@ -10,8 +10,8 @@ import typing as t
 
 import yaml
 
-from ssg.engines import render_jinja
-from ssg.wildcards import (
+from sausage.engines import render_jinja
+from sausage.wildcards import (
     get_wildcard_candidates, has_wildcard, replace_wildcards
 )
 
