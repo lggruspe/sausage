@@ -24,8 +24,8 @@ def build() -> None:
     Assumes the site has been initialized.
     """
     config = Config.read("site.yaml")
-    with TemporaryDirectory() as tmp:
-        tmp = Path(tmp)
+    with TemporaryDirectory() as tmp_str:
+        tmp = Path(tmp_str)
         shutil.copytree("src", tmp, dirs_exist_ok=True)
 
         for name, target in config.targets.items():

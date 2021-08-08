@@ -10,7 +10,7 @@ from ssg.targets import ContextRecipe, Target
 
 class Config(t.NamedTuple):
     """ssg Config."""
-    ignore: t.List[Path]
+    ignore: t.List[str]
     targets: t.Dict[str, Target]
 
     @staticmethod

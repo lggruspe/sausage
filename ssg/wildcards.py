@@ -6,7 +6,7 @@ from pathlib import Path
 import typing as t
 
 
-def find_wildcards(string: str) -> t.Iterable[int]:
+def find_wildcards(string: str) -> t.Iterator[int]:
     """Find '%'s in string."""
     i = len(string)
     while i >= 0:
