@@ -10,7 +10,7 @@ import typing as t
 
 import yaml
 
-from sausage.engines import render_jinja
+from sausage.engines import JinjaEngine
 from sausage.wildcards import (
     get_wildcard_candidates, has_wildcard, replace_wildcards
 )
@@ -69,10 +69,11 @@ class Target(t.NamedTuple):
                 context[name] = recipe.eval()
         return context
 
-    def generate(self) -> str:
+    def generate(self, root: Path) -> str:
         """Generate target from template."""
+        engine = JinjaEngine(root)
         context = self.eval_context()
-        return render_jinja(self.template, context)
+        return engine.render(self.template, context)
 
     def get_globs(self) -> t.Iterable[str]:
         """Extract wildcard patterns used by target.

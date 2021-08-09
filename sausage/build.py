@@ -31,10 +31,10 @@ def build(root: Path) -> None:
         for name, target in config.targets.items():
             expanded = target.expand()
             if expanded is None:
-                (tmp/name).write_text(target.generate())
+                (tmp/name).write_text(target.generate(root))
             else:
                 for targ in expanded:
-                    (tmp/targ.name).write_text(targ.generate())
+                    (tmp/targ.name).write_text(targ.generate(root))
 
         public = root/"public"
         public.mkdir(exist_ok=True)

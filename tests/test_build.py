@@ -47,6 +47,27 @@ def test_build_does_not_copy_ignored_paths(site_root: Path) -> None:
     assert list(public.iterdir()) == [foo_html]
 
 
+def test_build_generates_simple_targets(site_root: Path) -> None:
+    (site_root/"site.yaml").write_text(
+        """
+        targets:
+          index.html:
+            template: index.html
+        """
+    )
+    (site_root/"src"/"index.html").write_text(
+        "{% for i in range(5) %}a{% endfor %}"
+    )
+
+    build(site_root)
+
+    public = site_root/"public"
+    index_html = public/"index.html"
+
+    assert list(public.iterdir()) == [index_html]
+    assert index_html.read_text() == "a" * 5
+
+
 def test_build_generates_targets_with_wildcards(site_root: Path) -> None:
     (site_root/"site.yaml").write_text(
         """
