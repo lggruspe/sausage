@@ -6,7 +6,7 @@ check:
 	mypy sausage/ tests/ --strict
 
 test:
-	pytest --cov=sausage tests/ --cov-report=term-missing
+	pytest --cov=sausage tests/ --cov-report=term-missing -v
 
 dist:
 	python setup.py sdist bdist_wheel

@@ -71,7 +71,7 @@ def test_build_generates_simple_targets(site_root: Path) -> None:
 def test_build_generates_targets_with_wildcards(site_root: Path) -> None:
     (site_root/"site.yaml").write_text(
         """
-        ignore: ["post.html"]
+        ignore: ["post.html", "**/*.md"]
         targets:
           "%.html":
             template: post.html
@@ -93,6 +93,77 @@ def test_build_generates_targets_with_wildcards(site_root: Path) -> None:
     assert len(children) == 3
 
     for expected in ["foo", "bar", "baz"]:
-        child = public/f"{expected}.md"
+        child = public/f"{expected}.html"
         assert child in children
         assert child.read_text() == expected.capitalize()
+
+
+def test_build_uses_json_context(site_root: Path) -> None:
+    (site_root/"site.yaml").write_text(
+        """
+        ignore: ["index.json"]
+        targets:
+          index.html:
+            template: index.html
+            context: index.json
+        """
+    )
+
+    src = site_root/"src"
+    (src/"index.html").write_text("{{ message }}")
+    (src/"index.json").write_text('{ "message": "Hello, world!" }')
+
+    build(site_root)
+
+    public = site_root/"public"
+    index_html = public/"index.html"
+    assert list(public.iterdir()) == [index_html]
+    assert index_html.read_text() == "Hello, world!"
+
+
+def test_build_uses_yaml_context(site_root: Path) -> None:
+    (site_root/"site.yaml").write_text(
+        """
+        ignore: ["index.yaml"]
+        targets:
+          index.html:
+            template: index.html
+            context: index.yaml
+        """
+    )
+
+    src = site_root/"src"
+    (src/"index.html").write_text("{{ message }}")
+    (src/"index.yaml").write_text(
+        """
+        message: Hello, world!
+        """
+    )
+
+    build(site_root)
+
+    public = site_root/"public"
+    index_html = public/"index.html"
+    assert list(public.iterdir()) == [index_html]
+    assert index_html.read_text() == "Hello, world!"
+
+
+def test_build_with_context_command(site_root: Path) -> None:
+    (site_root/"site.yaml").write_text(
+        """
+        targets:
+          index.html:
+            template: index.html
+            with:
+              message: python -c 'print("Hello, world!", end="")'
+        """
+    )
+    (site_root/"src"/"index.html").write_text("{{ message }}")
+
+    build(site_root)
+
+    public = site_root/"public"
+    index_html = public/"index.html"
+
+    assert list(public.iterdir()) == [index_html]
+    assert index_html.read_text() == "Hello, world!"

@@ -12,7 +12,7 @@ setuptools.setup(
     url="https://github.com/lggruspe/sausage",
     packages=setuptools.find_packages(),
     package_data={
-        "sausage": ["data/**/*"]
+        "sausage": ["data/*", "data/**/*"]
     },
     classifiers=[
         "Environment :: Console",

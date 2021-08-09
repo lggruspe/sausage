@@ -28,13 +28,9 @@ def build(root: Path) -> None:
         tmp = Path(tmp_str)
         shutil.copytree(root/"src", tmp, dirs_exist_ok=True)
 
-        for name, target in config.targets.items():
-            expanded = target.expand()
-            if expanded is None:
-                (tmp/name).write_text(target.generate(root))
-            else:
-                for targ in expanded:
-                    (tmp/targ.name).write_text(targ.generate(root))
+        for target in config.targets.values():
+            for targ in target.expand(root):
+                (tmp/targ.name).write_text(targ.generate(root))
 
         public = root/"public"
         public.mkdir(exist_ok=True)

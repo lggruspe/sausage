@@ -25,9 +25,9 @@ class ContextRecipe(t.NamedTuple):
         recipe = replace_wildcards(self.recipe, replacement)
         return ContextRecipe(recipe)
 
-    def eval(self) -> t.Any:
-        """Evaluate context in src/."""
-        src = Path("src")
+    def eval(self, root: Path) -> t.Any:
+        """Evaluate context in root/src/."""
+        src = root/"src"
         path = src/self.recipe
         if path.is_file():
             text = path.read_text()
@@ -61,18 +61,18 @@ class Target(t.NamedTuple):
     context: t.Optional[ContextRecipe] = None
     namespace: t.Dict[str, ContextRecipe] = {}
 
-    def eval_context(self) -> t.Any:
-        """"Evaluate template context in src/."""
-        context = {} if not self.context else self.context.eval()
+    def eval_context(self, root: Path) -> t.Any:
+        """"Evaluate template context in root/src/."""
+        context = {} if not self.context else self.context.eval(root)
         if isinstance(context, dict):
             for name, recipe in self.namespace.items():
-                context[name] = recipe.eval()
+                context[name] = recipe.eval(root)
         return context
 
     def generate(self, root: Path) -> str:
         """Generate target from template."""
         engine = JinjaEngine(root)
-        context = self.eval_context()
+        context = self.eval_context(root)
         return engine.render(self.template, context)
 
     def get_globs(self) -> t.Iterable[str]:
@@ -89,19 +89,21 @@ class Target(t.NamedTuple):
                 if has_wildcard(token):
                     yield replace_wildcards(token, "*")
 
-    def expand(self) -> t.Optional[t.Iterable["Target"]]:
-        """Expand % in target.
+    def expand(self, root: Path) -> t.Iterator["Target"]:
+        """Expand into concrete targets.
 
-        Returns None if target doesn't have %.
+        E.g. % gets replaced with appropriate values.
+        If the target doesn't have %, then it only yields itself.
         """
         if not has_wildcard(self.name):
-            return None
+            yield self
+            return
 
         patterns = self.get_globs()
         replacements = set.intersection(
-            *(set(get_wildcard_candidates(p)) for p in patterns)
+            *(set(get_wildcard_candidates(root, p)) for p in patterns)
         )
-        return (
+        yield from (
             Target(
                 name=replace_wildcards(self.name, replacement),
                 template=self.template,
