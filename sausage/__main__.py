@@ -1,6 +1,7 @@
 """sausage command-line interface."""
 
 from argparse import ArgumentParser
+from pathlib import Path
 
 from sausage.build import build
 from sausage.init import init
@@ -25,7 +26,7 @@ def main() -> None:
     parser = create_parser()
     args = parser.parse_args()
     if args.callback:
-        args.callback()
+        args.callback(Path())
 
 
 if __name__ == "__main__":

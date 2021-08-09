@@ -18,15 +18,15 @@ def clear(directory: Path) -> None:
             child.unlink(missing_ok=True)
 
 
-def build() -> None:
+def build(root: Path) -> None:
     """Generate site in public/.
 
     Assumes the site has been initialized.
     """
-    config = Config.read("site.yaml")
+    config = Config.read(root/"site.yaml")
     with TemporaryDirectory() as tmp_str:
         tmp = Path(tmp_str)
-        shutil.copytree("src", tmp, dirs_exist_ok=True)
+        shutil.copytree(root/"src", tmp, dirs_exist_ok=True)
 
         for name, target in config.targets.items():
             expanded = target.expand()
@@ -36,7 +36,7 @@ def build() -> None:
                 for targ in expanded:
                     (tmp/targ.name).write_text(targ.generate())
 
-        public = Path("public")
+        public = root/"public"
         public.mkdir(exist_ok=True)
         clear(public)
         for child in tmp.iterdir():

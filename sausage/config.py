@@ -39,4 +39,7 @@ class Config(t.NamedTuple):
     @staticmethod
     def read(path: t.Union[str, Path]) -> "Config":
         """Read config from file."""
-        return Config.from_dict(yaml.safe_load(Path(path).read_text()))
+        mapping = yaml.safe_load(Path(path).read_text())
+        if isinstance(mapping, dict):
+            return Config.from_dict(mapping)
+        raise NotImplementedError
